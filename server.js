@@ -1,42 +1,25 @@
-/* ******************************************
- * This server.js file is the primary file of the 
- * application. It is used to control the project.
- *******************************************/
-/* ***********************
- * Require Statements
- *************************/
-const express = require("express")
-const expressLayouts = require("express-ejs-layouts")
-const env = require("dotenv").config()
-const app = express()
-const static = require("./routes/static")
+const express = require('express');
+const app = express();
+const expressLayouts = require('express-ejs-layouts');
 
+// Set up static files
+app.use(express.static('public'));
 
-/* ***********************
- * View Engine & Templates
- *************************/
-app.set("view engine", "ejs")
-app.use(expressLayouts)
-app.set("layout", "./layouts/layout") //not at views root 
-/* ***********************
- * Routes
- *************************/
-app.use(static)
-//index route
-app.get("/", function(req, res){
-  res.render("index", {title: "Home"})
-})
+// Set up EJS and layouts
+app.set('view engine', 'ejs');
+app.use(expressLayouts);
+app.set('layout', 'layouts/layout');
 
-/* ***********************
- * Local Server Information
- * Values from .env (environment) file
- *************************/
-const port = process.env.PORT
-const host = process.env.HOST
+// Routes
+app.get('/', (req, res) => {
+    res.render('index', { 
+        title: 'Home | CSE Motors',
+        currentUrl: '/'
+    });
+});
 
-/* ***********************
- * Log statement to confirm server operation
- *************************/
-app.listen(port, () => {
-  console.log(`app listening on ${host}:${port}`)
-})
+// Start server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
