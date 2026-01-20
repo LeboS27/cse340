@@ -1,14 +1,3 @@
 <nav>
-    <button class="menu-toggle" aria-label="Toggle navigation menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    <ul class="nav-menu">
-        <li><a href="/" class="<%= currentUrl === '/' ? 'active' : '' %>">Home</a></li>
-        <li><a href="/inventory" class="<%= currentUrl === '/inventory' ? 'active' : '' %>">Inventory</a></li>
-        <li><a href="/services" class="<%= currentUrl === '/services' ? 'active' : '' %>">Services</a></li>
-        <li><a href="/about" class="<%= currentUrl === '/about' ? 'active' : '' %>">About</a></li>
-        <li><a href="/contact" class="<%= currentUrl === '/contact' ? 'active' : '' %>">Contact</a></li>
-    </ul>
+    <%- nav %>
 </nav>
