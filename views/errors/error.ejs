@@ -1,10 +1,16 @@
-<% if (title) { %>
-<h1><%= title %></h1>
-<% } else {
-  res.redirect('/')
-} %>
+<%- include('../partials/header') %>
 
+<main>
+  <% if (title) { %>
+    <h1><%= title %></h1>
+  <% } %>
+  
+  <p><%- message %></p>
+  
+  <!-- Optional: Add humor or a friendly message -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <p>Don't worry, even our best mechanics have bad days!</p>
+  </div>
+</main>
 
-<%# messages() %>
-
-<%- grid %>
+<%- include('../partials/footer') %>
