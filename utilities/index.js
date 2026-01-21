@@ -57,6 +57,40 @@ Util.buildClassificationGrid = async function(data){
   return grid
 }
 
+/* **************************************
+ * Build the inventory detail view HTML
+ * ************************************ */
+Util.buildDetailGrid = function(data){
+  if (!data) {
+    return '<p class="notice">Vehicle not found.</p>';
+  }
+  
+  // Format price as USD
+  const formattedPrice = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(data.inv_price);
+  
+  const formattedMileage = new Intl.NumberFormat().format(data.inv_miles);
+  
+  let grid = '<div class="vehicle-detail-container">';
+  grid += '<div class="vehicle-detail">';
+  grid += '<div class="vehicle-image">';
+  grid += `<img src="${data.inv_image}" alt="${data.inv_make} ${data.inv_model}" class="detail-img">`;
+  grid += '</div>';
+  grid += '<div class="vehicle-info">';
+  grid += `<h2>${data.inv_year} ${data.inv_make} ${data.inv_model}</h2>`;
+  grid += `<p><strong>Price:</strong> ${formattedPrice}</p>`;
+  grid += `<p><strong>Mileage:</strong> ${formattedMileage} miles</p>`;
+  grid += `<p><strong>Color:</strong> ${data.inv_color}</p>`;
+  grid += `<p><strong>Description:</strong> ${data.inv_description}</p>`;
+  grid += '</div>';
+  grid += '</div>';
+  grid += '</div>';
+  
+  return grid;
+}
+
 /* ****************************************
  * Middleware For Handling Errors
  * Wrap other function in this for 
