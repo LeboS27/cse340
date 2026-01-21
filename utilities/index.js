@@ -6,24 +6,33 @@ const Util = {}
  ************************** */
 Util.getNav = async function (req, res, next) {
   let data = await invModel.getClassifications()
-  let list = "<ul>"
+  
+  if (!data || !data.rows) {
+    console.log("No classification data found, using mock data")
+    const mockClassifications = [
+      { classification_id: 1, classification_name: "Custom" },
+      { classification_id: 2, classification_name: "Sport" },
+      { classification_id: 3, classification_name: "SUV" },
+      { classification_id: 4, classification_name: "Truck" },
+      { classification_id: 5, classification_name: "Sedan" }
+    ]
+    data = { rows: mockClassifications }
+  }
+  
+  let list = '<ul class="nav-menu">'
   list += '<li><a href="/" title="Home page">Home</a></li>'
+  
   data.rows.forEach((row) => {
-    list += "<li>"
-    list +=
-      '<a href="/inv/type/' +
-      row.classification_id +
-      '" title="See our inventory of ' +
-      row.classification_name +
-      ' vehicles">' +
-      row.classification_name +
-      "</a>"
-    list += "</li>"
+    list += '<li>'
+    list += '<a href="/inv/type/' + row.classification_id + 
+            '" title="See our inventory of ' + row.classification_name + 
+            ' vehicles">' + row.classification_name + '</a>'
+    list += '</li>'
   })
-  list += "</ul>"
+  
+  list += '</ul>'
   return list
 }
-
 /* **************************************
 * Build the classification view HTML
 * ************************************ */

@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === "production") {
     },
   })
 
-  // Added for troubleshooting queries during development
+
   module.exports = {
     async query(text, params) {
       try {
