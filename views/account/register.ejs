@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <main>
+        <div class="container">
+            <h1><%= title %></h1>
+            
+            <!-- Flash Message Display -->
+            <% if (messages && messages.error) { %>
+                <div class="flash-message error">
+                    <%= messages.error %>
+                </div>
+            <% } %>
+            <% if (messages && messages.success) { %>
+                <div class="flash-message success">
+                    <%= messages.success %>
+                </div>
+            <% } %>
+            <% if (messages && messages.info) { %>
+                <div class="flash-message info">
+                    <%= messages.info %>
+                </div>
+            <% } %>
+
+            <% if (errors) { %>
+                <ul class="notice">
+            <% errors.array().forEach(error => { %>
+                <li><%= error.msg %></li>
+            <%  }) %>
+                </ul>
+            <% } %>
+
+            <!-- Registration Form -->
+            <div class="form-container">
+                <form action="/account/register" method="post" class="registration-form">
+                    <div class="form-group">
+                        <label for="account_firstname">First Name</label>
+                        <input type="text" 
+                               id="account_firstname" 
+                               name="account_firstname" 
+                               placeholder="Enter your first name" 
+                               required 
+                               autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_lastname">Last Name</label>
+                        <input type="text" 
+                               id="account_lastname" 
+                               name="account_lastname" 
+                               placeholder="Enter your last name" 
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_email">Email Address</label>
+                        <input type="email" 
+                               id="account_email" 
+                               name="account_email" 
+                               placeholder="Enter your email" 
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_password">Password</label>
+                        <div class="password-requirements">
+                            <strong>Password Requirements:</strong>
+                            <ul>
+                                <li>At least 12 characters</li>
+                                <li>At least 1 uppercase letter (A-Z)</li>
+                                <li>At least 1 lowercase letter (a-z)</li>
+                                <li>At least 1 number (0-9)</li>
+                                <li>At least 1 special character (!@#$%^&*, etc.)</li>
+                                <li>No spaces allowed</li>
+                            </ul>
+                        </div>
+                        <input type="password" 
+                               id="account_password" 
+                               name="account_password" 
+                               placeholder="Enter your password" 
+                               required 
+                               pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,}$"
+                               title="Password must be at least 12 characters and contain at least 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, and no spaces">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+
+                <!-- Login Link -->
+                <div class="login-link">
+                    <p>Already have an account? 
+                        <a href="/account/login">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

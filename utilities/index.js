@@ -30,6 +30,9 @@ Util.getNav = async function (req, res, next) {
     list += '</li>'
   })
   
+  // Add My Account link
+  list += '<li><a href="/account/login" title="Login to your account">My Account</a></li>'
+  
   list += '</ul>'
   return list
 }
