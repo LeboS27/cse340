@@ -3,8 +3,36 @@ const Util = {}
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
 
+
+/* ****************************************
+ *  Check if user is Admin
+ * ************************************ */
+Util.isAdmin = (req, res, next) => {
+  if (res.locals.loggedin && res.locals.accountData.account_type === 'Admin') {
+    next();
+  } else {
+    req.flash("error", "Access denied. Admin privileges required.");
+    res.redirect("/account/");
+  }
+};
+
+/* ****************************************
+ *  Check if user is Employee or Admin
+ * ************************************ */
+Util.isEmployee = (req, res, next) => {
+  if (res.locals.loggedin && 
+      (res.locals.accountData.account_type === 'Employee' || 
+       res.locals.accountData.account_type === 'Admin')) {
+    next();
+  } else {
+    req.flash("error", "Access denied. Employee or Admin privileges required.");
+    res.redirect("/account/");
+  }
+};
+
 /* ************************
  * Constructs the nav HTML unordered list
+ * Updated to show Admin link for admin users
  ************************** */
 Util.getNav = async function (req, res, next) {
   try {
@@ -36,13 +64,27 @@ Util.getNav = async function (req, res, next) {
     
     // Check if user is logged in - handle case when res is undefined
     let loggedin = false
-    if (res && res.locals && res.locals.loggedin) {
-      loggedin = true
+    let isAdmin = false
+    
+    if (res && res.locals) {
+      if (res.locals.loggedin) {
+        loggedin = true
+      }
+      // Check if user is admin
+      if (res.locals.accountData && res.locals.accountData.account_type === 'Admin') {
+        isAdmin = true
+      }
     }
     
     if (loggedin) {
       // When logged in, show "Inventory Management" instead of "My Account"
       list += '<li><a href="/inv/management" title="Manage Inventory">Inventory Management</a></li>'
+      
+      // Add User Management link for admin users
+      if (isAdmin) {
+        list += '<li><a href="/account/manage" title="User Management">User Management</a></li>'
+      }
+      
       list += '<li><a href="/account/" title="Your Account">My Account</a></li>'
     } else {
       // When logged out, show login link
@@ -192,6 +234,7 @@ Util.checkLogin = (req, res, next) => {
     return res.redirect("/account/login")
   }
 }
+
 
 /* ****************************************
  * Middleware For Handling Errors

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - CSE Motors</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <main class="container">
+        <h1><%= title %></h1>
+        
+        <!-- Flash Messages -->
+        <% if (messages && messages.error) { %>
+            <div class="flash-message error">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        <% if (messages && messages.success) { %>
+            <div class="flash-message success">
+                <%= messages.success %>
+            </div>
+        <% } %>
+        <% if (messages && messages.notice) { %>
+            <div class="flash-message notice">
+                <%= messages.notice %>
+            </div>
+        <% } %>
+
+        <!-- Validation Errors -->
+        <% if (errors && errors.length > 0) { %>
+            <div class="error-message">
+                <h3>Please correct the following:</h3>
+                <ul>
+                    <% errors.forEach(function(error) { %>
+                        <li><%= error.msg %></li>
+                    <% }) %>
+                </ul>
+            </div>
+        <% } %>
+
+        <div class="profile-container">
+            <div class="profile-info">
+                <h2>Account Information</h2>
+                <p><strong>Account Type:</strong> <%= account.account_type %></p>
+                <p><strong>Member Since:</strong> <%= new Date(account.account_created).toLocaleDateString() %></p>
+            </div>
+
+            <div class="profile-form">
+                <h2>Update Profile</h2>
+                <form action="/account/update-profile" method="post" id="profileForm">
+                    <div class="form-group">
+                        <label for="account_firstname">First Name *</label>
+                        <input type="text" id="account_firstname" name="account_firstname" 
+                               value="<%= account.account_firstname %>" required
+                               minlength="1" maxlength="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_lastname">Last Name *</label>
+                        <input type="text" id="account_lastname" name="account_lastname" 
+                               value="<%= account.account_lastname %>" required
+                               minlength="2" maxlength="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_email">Email Address *</label>
+                        <input type="email" id="account_email" name="account_email" 
+                               value="<%= account.account_email %>" required
+                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                        <a href="/account/" class="btn btn-secondary">Back to Account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+    
+    <script>
+        // Client-side validation
+        document.getElementById('profileForm').addEventListener('submit', function(event) {
+            const firstName = document.getElementById('account_firstname').value.trim();
+            const lastName = document.getElementById('account_lastname').value.trim();
+            const email = document.getElementById('account_email').value.trim();
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            
+            if (!firstName || firstName.length < 1) {
+                alert('Please enter a valid first name.');
+                event.preventDefault();
+                return false;
+            }
+            
+            if (!lastName || lastName.length < 2) {
+                alert('Please enter a valid last name (min 2 characters).');
+                event.preventDefault();
+                return false;
+            }
+            
+            if (!emailPattern.test(email)) {
+                alert('Please enter a valid email address.');
+                event.preventDefault();
+                return false;
+            }
+            
+            return true;
+        });
+    </script>
+</body>
+</html>

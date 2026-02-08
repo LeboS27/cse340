@@ -101,11 +101,17 @@ app.get("/test-nav", async (req, res) => {
 
 /* ***********************
 * Express Error Handler
+* Place after all other middleware
 *************************/
 app.use(async (err, req, res, next) => {
   // Initialize res.locals if not set
   if (!res.locals) {
     res.locals = {}
+  }
+  
+  // Also ensure res.locals.loggedin is defined
+  if (res.locals.loggedin === undefined) {
+    res.locals.loggedin = false
   }
   
   let nav

@@ -122,10 +122,175 @@ async function buildManagement(req, res, next) {
   });
 }
 
+/* ****************************************
+* Build account management dashboard
+* *************************************** */
+async function buildManagementDashboard(req, res, next) {
+  try {
+    let nav = await utilities.getNav(req, res);
+    const accountData = res.locals.accountData;
+    
+    // Check if user is admin
+    if (accountData.account_type === 'Admin') {
+      // Admin view: get all accounts
+      const allAccounts = await accountModel.getAllAccounts();
+      
+      // Log admin access
+      await accountModel.logAccountActivity(
+        accountData.account_id, 
+        'ADMIN_ACCESS', 
+        'Accessed user management dashboard'
+      );
+      
+      res.render("account/admin-dashboard", {
+        title: "User Management Dashboard",
+        nav,
+        accounts: allAccounts,
+        currentUser: accountData,
+        messages: req.flash() || {}
+      });
+    } else {
+      // Regular user: get their own profile
+      const userAccount = await accountModel.getAccountById(accountData.account_id);
+      
+      res.render("account/user-profile", {
+        title: "My Profile",
+        nav,
+        account: userAccount,
+        errors: null,
+        messages: req.flash() || {}
+      });
+    }
+  } catch (error) {
+    console.error("buildManagementDashboard error: ", error);
+    next(error);
+  }
+}
+
+/* ****************************************
+* Update user profile (for regular users)
+* *************************************** */
+async function updateUserProfile(req, res, next) {
+  try {
+    let nav = await utilities.getNav(req, res);
+    const accountData = res.locals.accountData;
+    const { account_firstname, account_lastname, account_email } = req.body;
+    
+    // Validation rules
+    const validationRules = [
+      body("account_firstname")
+        .trim()
+        .escape()
+        .notEmpty()
+        .isLength({ min: 1 })
+        .withMessage("Please provide a first name."),
+      body("account_lastname")
+        .trim()
+        .escape()
+        .notEmpty()
+        .isLength({ min: 2 })
+        .withMessage("Please provide a last name."),
+      body("account_email")
+        .trim()
+        .escape()
+        .notEmpty()
+        .isEmail()
+        .normalizeEmail()
+        .withMessage("A valid email is required.")
+    ];
+    
+    // Apply validation
+    await Promise.all(validationRules.map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      // Return to form with errors
+      const userAccount = await accountModel.getAccountById(accountData.account_id);
+      
+      return res.render("account/user-profile", {
+        title: "My Profile",
+        nav,
+        account: userAccount,
+        errors: errors.array(),
+        messages: req.flash() || {}
+      });
+    }
+    
+    // Update profile
+    const updatedAccount = await accountModel.updateAccountProfile(
+      accountData.account_id,
+      account_firstname,
+      account_lastname,
+      account_email
+    );
+    
+    // Log activity
+    await accountModel.logAccountActivity(
+      accountData.account_id,
+      'PROFILE_UPDATE',
+      `Updated profile information`
+    );
+    
+    req.flash("success", "Your profile has been updated successfully!");
+    res.redirect("/account/manage");
+    
+  } catch (error) {
+    console.error("updateUserProfile error: ", error);
+    req.flash("error", "Failed to update profile. Please try again.");
+    res.redirect("/account/manage");
+  }
+}
+
+/* ****************************************
+* Update account type (admin only)
+* *************************************** */
+async function updateUserAccountType(req, res, next) {
+  try {
+    const accountData = res.locals.accountData;
+    const { target_account_id, new_account_type } = req.body;
+    
+    // Authorization check
+    if (accountData.account_type !== 'Admin') {
+      req.flash("error", "Unauthorized action.");
+      return res.redirect("/account/manage");
+    }
+    
+    // Prevent self-modification
+    if (parseInt(target_account_id) === accountData.account_id) {
+      req.flash("error", "Cannot modify your own account type.");
+      return res.redirect("/account/manage");
+    }
+    
+    // Update account type
+    const updatedAccount = await accountModel.updateAccountType(
+      target_account_id,
+      new_account_type
+    );
+    
+    // Log activity
+    await accountModel.logAccountActivity(
+      accountData.account_id,
+      'ACCOUNT_TYPE_UPDATE',
+      `Changed account type for user ${target_account_id} to ${new_account_type}`
+    );
+    
+    req.flash("success", `Account type updated successfully for ${updatedAccount.account_firstname} ${updatedAccount.account_lastname}`);
+    res.redirect("/account/manage");
+    
+  } catch (error) {
+    console.error("updateUserAccountType error: ", error);
+    req.flash("error", "Failed to update account type.");
+    res.redirect("/account/manage");
+  }
+}
+
 module.exports = {
   buildLogin,
   buildRegister,
   registerAccount,
   accountLogin,
-  buildManagement
+  buildManagement,
+  buildManagementDashboard,  
+  updateUserProfile,         
+  updateUserAccountType      
 };
