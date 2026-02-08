@@ -1,41 +1,63 @@
 const invModel = require("../models/inventory-model")
 const Util = {}
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 /* ************************
  * Constructs the nav HTML unordered list
  ************************** */
 Util.getNav = async function (req, res, next) {
-  let data = await invModel.getClassifications()
-  
-  if (!data || !data.rows) {
-    console.log("No classification data found, using mock data")
-    const mockClassifications = [
-      { classification_id: 1, classification_name: "Custom" },
-      { classification_id: 2, classification_name: "Sport" },
-      { classification_id: 3, classification_name: "SUV" },
-      { classification_id: 4, classification_name: "Truck" },
-      { classification_id: 5, classification_name: "Sedan" }
-    ]
-    data = { rows: mockClassifications }
+  try {
+    let data = await invModel.getClassifications()
+    
+    if (!data || !data.rows) {
+      console.log("No classification data found, using mock data")
+      const mockClassifications = [
+        { classification_id: 1, classification_name: "Custom" },
+        { classification_id: 2, classification_name: "Sport" },
+        { classification_id: 3, classification_name: "SUV" },
+        { classification_id: 4, classification_name: "Truck" },
+        { classification_id: 5, classification_name: "Sedan" }
+      ]
+      data = { rows: mockClassifications }
+    }
+    
+    // Initialize list variable
+    let list = '<ul class="nav-menu">'
+    list += '<li><a href="/" title="Home page">Home</a></li>'
+    
+    data.rows.forEach((row) => {
+      list += '<li>'
+      list += '<a href="/inv/type/' + row.classification_id + 
+              '" title="See our inventory of ' + row.classification_name + 
+              ' vehicles">' + row.classification_name + '</a>'
+      list += '</li>'
+    })
+    
+    // Check if user is logged in - handle case when res is undefined
+    let loggedin = false
+    if (res && res.locals && res.locals.loggedin) {
+      loggedin = true
+    }
+    
+    if (loggedin) {
+      // When logged in, show "Inventory Management" instead of "My Account"
+      list += '<li><a href="/inv/management" title="Manage Inventory">Inventory Management</a></li>'
+      list += '<li><a href="/account/" title="Your Account">My Account</a></li>'
+    } else {
+      // When logged out, show login link
+      list += '<li><a href="/account/login" title="Login to your account">My Account</a></li>'
+    }
+    
+    list += '</ul>'
+    return list
+  } catch (error) {
+    console.error('Error in getNav:', error)
+    // Return a basic nav in case of error
+    return '<ul class="nav-menu"><li><a href="/" title="Home page">Home</a></li><li><a href="/account/login" title="Login to your account">My Account</a></li></ul>'
   }
-  
-  let list = '<ul class="nav-menu">'
-  list += '<li><a href="/" title="Home page">Home</a></li>'
-  
-  data.rows.forEach((row) => {
-    list += '<li>'
-    list += '<a href="/inv/type/' + row.classification_id + 
-            '" title="See our inventory of ' + row.classification_name + 
-            ' vehicles">' + row.classification_name + '</a>'
-    list += '</li>'
-  })
-  
-  // Add My Account link
-  list += '<li><a href="/account/login" title="Login to your account">My Account</a></li>'
-  
-  list += '</ul>'
-  return list
 }
+
 /* **************************************
 * Build the classification view HTML
 * ************************************ */
@@ -101,6 +123,74 @@ Util.buildDetailGrid = function(data){
   grid += '</div>';
   
   return grid;
+}
+
+/* ************************
+ * Build classification list HTML for select
+ ************************** */
+Util.buildClassificationList = async function (classification_id = 0) {
+  let data = await invModel.getClassifications()
+  
+  if (!data || !data.rows) {
+    console.log("No classification data found, using mock data")
+    const mockClassifications = [
+      { classification_id: 1, classification_name: "Custom" },
+      { classification_id: 2, classification_name: "Sport" },
+      { classification_id: 3, classification_name: "SUV" },
+      { classification_id: 4, classification_name: "Truck" },
+      { classification_id: 5, classification_name: "Sedan" }
+    ]
+    data = { rows: mockClassifications }
+  }
+  
+  let list = '<select name="classification_id" id="classificationList" required>'
+  list += '<option value="">Choose a Classification</option>'
+  
+  data.rows.forEach((row) => {
+    list += '<option value="' + row.classification_id + '"'
+    if (row.classification_id == classification_id) {
+      list += ' selected '
+    }
+    list += '>' + row.classification_name + '</option>'
+  })
+  
+  list += '</select>'
+  return list
+}
+
+/* ****************************************
+* Middleware to check token validity
+**************************************** */
+Util.checkJWTToken = (req, res, next) => {
+  if (req.cookies.jwt) {
+    jwt.verify(
+      req.cookies.jwt,
+      process.env.ACCESS_TOKEN_SECRET,
+      function (err, accountData) {
+        if (err) {
+          req.flash("notice", "Please log in")
+          res.clearCookie("jwt")
+          return res.redirect("/account/login")
+        }
+        res.locals.accountData = accountData
+        res.locals.loggedin = 1
+        next()
+      })
+  } else {
+    next()
+  }
+}
+
+/* ****************************************
+ *  Check Login
+ * ************************************ */
+Util.checkLogin = (req, res, next) => {
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
 }
 
 /* ****************************************

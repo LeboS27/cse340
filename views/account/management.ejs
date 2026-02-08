@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <main>
+        <div class="container">
+            <h1><%= title %></h1>
+            
+            <!-- Flash Message Display -->
+            <% if (messages && messages.error) { %>
+                <div class="flash-message error">
+                    <%= messages.error %>
+                </div>
+            <% } %>
+            <% if (messages && messages.success) { %>
+                <div class="flash-message success">
+                    <%= messages.success %>
+                </div>
+            <% } %>
+            <% if (messages && messages.info) { %>
+                <div class="flash-message info">
+                    <%= messages.info %>
+                </div>
+            <% } %>
+            <% if (messages && messages.notice) { %>
+                <div class="flash-message notice">
+                    <%= messages.notice %>
+                </div>
+            <% } %>
+
+            <div class="account-content">
+                <h2>Welcome to Your Account</h2>
+                <p>You're logged in!</p>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

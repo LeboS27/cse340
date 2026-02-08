@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <main>
+        <div class="container">
+            <h1><%= title %></h1>
+            
+            <!-- Flash Message Display -->
+            <% if (messages && messages.error) { %>
+                <div class="flash-message error">
+                    <%= messages.error %>
+                </div>
+            <% } %>
+            <% if (messages && messages.success) { %>
+                <div class="flash-message success">
+                    <%= messages.success %>
+                </div>
+            <% } %>
+            <% if (messages && messages.info) { %>
+                <div class="flash-message info">
+                    <%= messages.info %>
+                </div>
+            <% } %>
+            <% if (messages && messages.notice) { %>
+                <div class="flash-message notice">
+                    <%= messages.notice %>
+                </div>
+            <% } %>
+
+            <!-- Inventory Management Content -->
+            <div class="management-container">
+                <div class="management-section">
+                    <h2>Inventory Management Options</h2>
+                    
+                    <div class="management-options">
+                        <div class="option-card">
+                            <h3>Add New Classification</h3>
+                            <p>Add a new vehicle classification to the system.</p>
+                            <a href="/inv/add-classification" class="btn btn-primary">Add Classification</a>
+                        </div>
+                        
+                        <div class="option-card">
+                            <h3>Add New Vehicle</h3>
+                            <p>Add a new vehicle to the inventory.</p>
+                            <a href="/inv/add-inventory" class="btn btn-primary">Add Vehicle</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classification Selection for Inventory -->
+                <div class="inventory-section">
+                    <h2>Manage Inventory</h2>
+                    <p>Select a classification from the list to see the items belonging to the classification.</p>
+                    
+                    <div class="form-group">
+                        <label for="classificationList">Classification:</label>
+                        <%- classificationSelect %>
+                    </div>
+                    
+                    <!-- Table for inventory display -->
+                    <table id="inventoryDisplay" class="inventory-table">
+                        <!-- Table will be populated by JavaScript -->
+                    </table>
+                    
+                    <!-- Noscript message -->
+                    <noscript>
+                        <p>JavaScript must be enabled to use this page.</p>
+                    </noscript>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+    
+    <script src="/js/inventory.js"></script>
+</body>
+</html>
